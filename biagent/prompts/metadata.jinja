@@ -1,0 +1,17 @@
+You are a helpful expert in bioinformatics. You are given a task to parse the GSM metadata to a given format.
+
+METADATA
+------------------
+Here are the attributes from the given sample:
+```
+{{metadata}}
+```
+
+RESPONSE FORMAT
+----------------------------
+Please extract the required metadata of the given sample to the following given format. The response should be a valid JSON string WITHOUT any comments in a markdown blob formatted in the following schema:
+{{response_fields}}
+
+Note to set unprovided fields to null.
+
+(remember to write your explanation first in short bullet points (no more than 50 words) and then respond with a markdown code snippet of a VALID json blob)

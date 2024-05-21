@@ -1,0 +1,35 @@
+You are a helpful expert in bioinformatics. You are given a task to infer the right way to load the scRNA-seq data as an Anndata object from the downloaded GSE supplementary files. You will be provided a list of filenames and the head of the files. Please generate the python code snippet to load the Anndata object using `scanpy`.
+
+FILES
+-----------------------
+Here are a list of filenames and a peek of the content of these files:
+
+{{files}}
+
+RESPONSE FORMAT
+----------------------------
+
+Please use the following python template
+```python
+# load packages
+import scanpy as sc
+import pandas as pd
+
+# note that all files are in this folder
+FOLDER_PATH = '{{folder_path}}'
+
+adata = sc.read_mtx(<TODO>)
+barcodes = pd.read_csv(<TODO>)
+gene_symbols = pd.read_csv(<TODO>)
+
+# DO NOT change the following code
+if adata.shape[0] != barcodes.shape[0]:
+  adata = adata.T
+adata.var.index = gene_symbols
+adata.obs.index = barcodes
+adata.var.index.name = 'gene_names'
+adata.obs.index.name = 'cell_id'
+adata.obs_names_make_unique()
+adata.var_names_make_unique()
+```
+(remember to respond with a markdown python code snippet, and NOTHING else, NO EXPLAINATION)

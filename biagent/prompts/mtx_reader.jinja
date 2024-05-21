@@ -1,0 +1,44 @@
+You are a helpful expert in bioinformatics. You are given a task to infer the right way to load the scRNA-seq data as an Anndata object from the downloaded GSE supplementary files. You will be provided a list of filenames and the head of the files. Please generate the python code snippet to load the Anndata object using `scanpy`.
+
+FILES
+-----------------------
+Here are a list of filenames and a peek of the content of these files:
+
+{{files}}
+
+RESPONSE FORMAT
+----------------------------
+
+Please use the following python template, the part you need to fill in is marked with `<TODO>`. Note there are also a few questions in the comments you need to answer which are marked with `<TO_ANS>` (replace `<TO_ANS>` with your answer in comments). For example, `# Is the source data a cell by gene matrix?  <TO_ANS>` should be updated to `# Is the source data a cell by gene matrix? Yes.` if the source data is a cell by gene matrix.
+```python
+# load packages
+import pandas as pd
+import anndata as ad
+from scipy.sparse import crs_matrix
+# note that all files are in this folder
+FOLDER_PATH = '{{folder_path}}'
+
+# If present, what are the column names? <TO_ANS>
+# If present, what are the row names? <TO_ANS>
+# Based on the questions above, is the source data a cell by gene matrix (i.e., cell IDs as row names and gene symbols as column names)? <TO_ANS>
+cell_by_gene = <TODO> # bool
+# read the table, make sure using the gene symbols and cell IDs as indices and column names if present. Drop irrelevant IDs pls.
+data = pd.read_csv(<TODO>)
+
+# By examining the column names or the row names closely, does the source data contain any metadata? <TO_ANS>
+<TODO> # remove metadata
+
+# DO NOT change the following code
+if not cell_by_gene:
+  data = data.T
+data = data.astype(int) # make sure all values in the matrix are integers
+adata = ad.AnnData(X = crs_matrix(data.values))
+adata.var.index = data.columns.map(str)
+adata.obs.index = data.index.map(str)
+adata.var.index.name = 'gene_names'
+adata.obs.index.name = 'cell_id'
+adata.obs_names_make_unique()
+adata.var_names_make_unique()
+```
+
+(remember to respond with a markdown python code snippet, and NOTHING else, NO EXPLAINATION)
