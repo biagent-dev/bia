@@ -2,7 +2,7 @@
 
 ## Installation
 ```sh
-pip install -e .
+pip install git+https://github.com/biagent-dev/bia.git
 ```
 
 ### Examples
