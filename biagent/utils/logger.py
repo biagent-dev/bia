@@ -110,6 +110,12 @@ class AgentLogger:
     >>> )
     """
 
+    # ANSI color codes
+    RESET = "\033[0m"
+    RED = "\033[31m"
+    GREEN = "\033[32m"
+    YELLOW = "\033[33m"
+
     def __init__(self):
         self.logger = logging.getLogger(LOG_NAME)
         self.logger.propagate = False
@@ -164,7 +170,8 @@ class AgentLogger:
         self.logger.addHandler(error_file_handler)
 
     def info(self, message: str, *args):
-        self.logger.info(message, *args)
+        colored_message = f"{self.GREEN}{message}{self.RESET}"
+        self.logger.info(colored_message, *args)
 
     def query_info(
         self,
@@ -189,7 +196,8 @@ class AgentLogger:
         )
 
     def error(self, message: str = "", *args):
-        self.logger.error(message, *args)
+        colored_message = f"{self.RED}{message}{self.RESET}"
+        self.logger.error(colored_message, *args)
 
     def query_error(
         self,
@@ -215,7 +223,8 @@ class AgentLogger:
         )
 
     def warning(self, message: str = "", *args):
-        self.logger.warning(message, *args)
+        colored_message = f"{self.YELLOW}{message}{self.RESET}"
+        self.logger.warning(colored_message, *args)
 
     def query_warning(
         self,

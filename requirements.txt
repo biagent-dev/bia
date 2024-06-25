@@ -3,3 +3,5 @@ GEOparse
 scispacy
 h5py
 scanpy
+igviz
+networkx

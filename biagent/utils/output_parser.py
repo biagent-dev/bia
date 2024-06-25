@@ -6,6 +6,12 @@ from typing import Union
 import pandas as pd
 
 from biagent.types.type_alias import MarkdownTypes
+from biagent.utils.logger import biagent_logger as logger
+
+
+def json_indent_limit(json_string, indent="  ", limit=3):
+    regexPattern = re.compile(f"\n({indent}){{{limit}}}(({indent})+|(?=(}}|])))")
+    return regexPattern.sub("", json_string)
 
 
 def _replace_new_line(match: re.Match[str]) -> str:
@@ -79,7 +85,13 @@ def parse_json_markdown(code_string: str) -> dict:
     json_str = "\n".join(cleaned_lines)
     json_str = _custom_parser(json_str)
 
-    return json.loads(json_str)
+    try:
+        return json.loads(json_str)
+    except json.JSONDecodeError as e:
+        logger.error(
+            f"Error parsing json: {e}. Please check the json string: {json_str}"
+        )
+        raise
 
 
 def parse_json(code_string: str, parser=json.loads):

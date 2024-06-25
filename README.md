@@ -2,10 +2,19 @@
 
 ## Installation
 ```sh
-pip install git+https://github.com/biagent-dev/bia.git
+pip install -e .
 ```
 
 ### Examples
+
+Set up your API key first
+```sh
+# for dashscope
+export DASHSCOPE_API_KEY="<your_api_key>"
+# for openai
+export OPENAI_API_KEY="<your_api_key>"
+export OPENAI_API_BASE="<your_api_base>"
+```
 
 #### Search for samples
 ```sh
@@ -14,7 +23,6 @@ biagent geo_search "breast cancer"
 #### Metadata extraction
 Extract metadata from a chosen GEO sample, e.g.,
 ```sh
-export DASHSCOPE_API_KEY="<your_api_key>"
 biagent --model qwen-max metadata --gsm_id GSM3676057
 ```
 The tool also supports processing multiple GEO samples provided in a line separated text file, e.g.,
@@ -27,6 +35,12 @@ biagent --model qwen-max metadata --soft_file_list gse_soft_files.txt --parallel
 Read the count matrix from a chosen GEO sample, e.g.,
 ```sh
 biagent --model qwen-max count_matrix --gsm_id GSM3676057 --output count_matrix.h5ad
+```
+
+#### Pipeline extraction
+Extract the pipeline from a given paper in markdown, e.g.,
+```sh
+biagent --model gpt-4o pipeline_extractor --parsed_paper <path_to_paper_markdown> --output pipeline.html
 ```
 
 ## Roadmap

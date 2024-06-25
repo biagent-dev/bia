@@ -2,7 +2,7 @@ import json
 
 from modelscope_agent.tools.base import BaseTool, register_tool
 
-from biagent.utils.geo_helper import search_geo_records
+from biagent.utils.geo_helpers import search_geo_records
 
 
 @register_tool("geo_search")

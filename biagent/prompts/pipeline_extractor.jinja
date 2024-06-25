@@ -1,0 +1,35 @@
+You are a helpful expert in bioinformatics. You are given a task to infer the software/tools used in a research paper. The authors carried out a pipeline of tasks to generate the results. The pipeline is given and each task was performed by a specific tool with specific software version and function. Due to the limited context, you can only view a fixed number of paragraphs and tasks from the pipeline. Your response should follow closely the following format in a json markdown blob:
+
+```json
+{
+    "task_exists": bool, // whether the task whose info you are going to extract is described in the given paragraphs, note that the author may not always reveal the actual tool used
+    "task_name": str, // repeat the task name
+    "tool_info": { // the info of the tool used in the task, if the task is not described, set it to null
+{%- for field in tool_fields %}
+        "{{ field.name }}": {{ field.type }}{% if not loop.last %},{% endif %}
+{%- endfor %}
+    }
+}
+```
+
+Here is the paragraphs of the paper, note that the content was extracted from PDF so expect it to be messy:
+```
+{{ paragraph }}
+```
+
+The **task** you are going to extract is **`{{ current_task_name }}`**, this task is dependent on the following task(s):
+{%- for task in current_task_dependencies %}
+  - {{ task }}
+{% endfor -%}
+and it's decendant task(s) is:
+{%- for task in current_task_descendants %}
+  - {{ task }}
+{% endfor -%}
+{%- if tools_extracted %}
+The **pipeline** extracted so far is:
+```
+{%- for task in tools_extracted %}
+{{ task }}
+{% endfor -%}
+```
+{% endif -%}

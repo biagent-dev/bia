@@ -1,0 +1,254 @@
+[
+    {
+        "id": 1,
+        "dep": [],
+        "name": "Raw Data",
+        "type": "input",
+        "optional": false,
+        "tool_required": false,
+        "metadata": {}
+    },
+    {
+        "id": 2,
+        "dep": [
+            1
+        ],
+        "name": "Sample Metadata Alignment",
+        "type": "process",
+        "optional": false,
+        "tool_required": false,
+        "metadata": {}
+    },
+    {
+        "id": 3,
+        "dep": [
+            2
+        ],
+        "name": "Quality Control",
+        "type": "process",
+        "optional": false,
+        "tool_required": true,
+        "metadata": {}
+    },
+    {
+        "id": 4,
+        "dep": [
+            3
+        ],
+        "name": "Normalization",
+        "type": "process",
+        "optional": false,
+        "tool_required": true,
+        "metadata": {}
+    },
+    {
+        "id": 5,
+        "dep": [
+            4
+        ],
+        "name": "Feature selection",
+        "type": "process",
+        "optional": false,
+        "tool_required": true,
+        "metadata": {}
+    },
+    {
+        "id": 6,
+        "dep": [
+            5
+        ],
+        "name": "Data integration",
+        "type": "process",
+        "optional": true,
+        "tool_required": true,
+        "metadata": {}
+    },
+    {
+        "id": 7,
+        "dep": [
+            6
+        ],
+        "name": "Dimensionality Reduction",
+        "type": "process",
+        "optional": false,
+        "tool_required": true,
+        "metadata": {}
+    },
+    {
+        "id": 8,
+        "dep": [
+            7
+        ],
+        "name": "Clustering",
+        "type": "process",
+        "optional": false,
+        "tool_required": true,
+        "metadata": {}
+    },
+    {
+        "id": 9,
+        "dep": [
+            8
+        ],
+        "name": "Cell-type Annotation",
+        "type": "process",
+        "optional": false,
+        "tool_required": true,
+        "metadata": {}
+    },
+    {
+        "id": 10,
+        "dep": [
+            9
+        ],
+        "name": "Malignant Cell Detection",
+        "type": "process",
+        "optional": true,
+        "tool_required": true,
+        "metadata": {}
+    },
+    {
+        "id": 11,
+        "dep": [
+            9
+        ],
+        "name": "Compositional analysis",
+        "type": "process",
+        "optional": true,
+        "tool_required": false,
+        "metadata": {}
+    },
+    {
+        "id": 12,
+        "dep": [
+            9
+        ],
+        "name": "Differential Gene Expression Analysis",
+        "type": "process",
+        "optional": true,
+        "tool_required": false,
+        "metadata": {}
+    },
+    {
+        "id": 13,
+        "dep": [
+            12
+        ],
+        "name": "Enrichment and Pathway Analysis",
+        "type": "process",
+        "optional": true,
+        "tool_required": true,
+        "metadata": {}
+    },
+    {
+        "id": 14,
+        "dep": [
+            9
+        ],
+        "name": "Cell-type Specificity Analysis",
+        "type": "process",
+        "optional": false,
+        "tool_required": false,
+        "metadata": {}
+    },
+    {
+        "id": 15,
+        "dep": [
+            14
+        ],
+        "name": "Cell with different types",
+        "type": "output",
+        "optional": true,
+        "tool_required": false,
+        "metadata": {}
+    },
+    {
+        "id": 16,
+        "dep": [
+            15
+        ],
+        "name": "Dimensionality Reduction",
+        "type": "cell_type_process",
+        "optional": true,
+        "tool_required": true,
+        "metadata": {}
+    },
+    {
+        "id": 17,
+        "dep": [
+            15,
+            16
+        ],
+        "name": "Subtype Explorations and Annotation",
+        "type": "cell_type_process",
+        "optional": false,
+        "tool_required": true,
+        "metadata": {}
+    },
+    {
+        "id": 18,
+        "dep": [
+            17
+        ],
+        "name": "Trajectory Analysis",
+        "type": "cell_type_process",
+        "optional": false,
+        "tool_required": true,
+        "metadata": {}
+    },
+    {
+        "id": 19,
+        "dep": [
+            17
+        ],
+        "name": "Compositional analysis",
+        "type": "cell_type_process",
+        "optional": false,
+        "tool_required": false,
+        "metadata": {}
+    },
+    {
+        "id": 20,
+        "dep": [
+            17
+        ],
+        "name": "Differential Gene Expression Analysis",
+        "type": "cell_type_process",
+        "optional": false,
+        "tool_required": true,
+        "metadata": {}
+    },
+    {
+        "id": 21,
+        "dep": [
+            20
+        ],
+        "name": "Enrichment and Pathway Analysis",
+        "type": "cell_type_process",
+        "optional": false,
+        "tool_required": true,
+        "metadata": {}
+    },
+    {
+        "id": 22,
+        "dep": [
+            17
+        ],
+        "name": "Gene Regulatory Networks",
+        "type": "cell_type_process",
+        "optional": false,
+        "tool_required": true,
+        "metadata": {}
+    },
+    {
+        "id": 23,
+        "dep": [
+            17
+        ],
+        "name": "Cell-Cell Communication",
+        "type": "cell_type_process",
+        "optional": false,
+        "tool_required": true,
+        "metadata": {}
+    }
+]

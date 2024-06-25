@@ -9,7 +9,8 @@ from modelscope_agent.utils.tokenization_utils import count_tokens
 from biagent import prompts
 from biagent.configs.metadata import DEFAULT_META_FIELD_GROUP
 from biagent.types import MetaFieldList
-from biagent.utils import geo_helper
+from biagent.utils import geo_helpers
+from biagent.utils.llm_helpers import get_chat_model
 from biagent.utils.logger import biagent_logger as logger
 from biagent.utils.output_parser import parse_json_markdown
 
@@ -29,16 +30,12 @@ class GeoMetadataExtraction(BaseTool):
 
     def __init__(
         self,
-        llm: dict | BaseChatModel | None,
+        llm: str | dict | BaseChatModel,
         meta_field_groups: list[MetaFieldList] | None = None,
         cfg: dict | None = {},
     ):
         super().__init__(cfg)
-        if isinstance(llm, dict):
-            self.llm_config = llm
-            self.llm = get_chat_model(**self.llm_config)
-        else:
-            self.llm = llm
+        self.llm = get_chat_model(llm)
         if meta_field_groups:
             self.meta_field_groups = meta_field_groups
         else:
@@ -51,7 +48,7 @@ class GeoMetadataExtraction(BaseTool):
                     meta_field_groups[0].append(meta_field)
             self.meta_field_groups = [MetaFieldList(root=g) for g in meta_field_groups]
 
-        self.umls_mapper = geo_helper.UMLSMapper(threshold=0.5)
+        self.umls_mapper = geo_helpers.UMLSMapper(threshold=0.5)
 
     def _get_metadata_as_string(self, gsm: GSM, max_tokens: int = 1000):
         """Get the metadata as SOFT formatted string."""
@@ -174,8 +171,6 @@ class GeoMetadataExtraction(BaseTool):
                     metadata=context_str, response_fields=response_fields_str
                 )
                 try:
-                    logger.info(f"Input tokens: {count_tokens(prompt)}")
-
                     step_reply = self.llm.chat(prompt)
                     if "Error" in step_reply:
                         raise ValueError(f"Error parsing metadata: {step_reply}")
@@ -207,6 +202,6 @@ class GeoMetadataExtraction(BaseTool):
         gsm_id = params.get("id")
         if not gsm_id.startswith("GSM"):
             raise ValueError("Invalid GSM ID")
-        gsm, gse = geo_helper.get_geo(gsm_id, return_gse=True)
+        gsm, gse = geo_helpers.get_geo(gsm_id, return_gse=True)
         extracted_metadata = self.parse_gsm(gsm, gse)
         return json.dumps(extracted_metadata, ensure_ascii=False, indent=4)

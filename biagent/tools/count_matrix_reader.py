@@ -2,14 +2,13 @@ from jinja2 import Template
 from modelscope_agent.llm import get_chat_model
 from modelscope_agent.llm.base import BaseChatModel
 from modelscope_agent.tools.base import BaseTool, register_tool
-from modelscope_agent.utils.tokenization_utils import count_tokens
 from scanpy import AnnData
 
 from biagent import prompts
 from biagent.types import FileType
-from biagent.utils import geo_helper
+from biagent.utils import geo_helpers
 from biagent.utils.code_runner import safe_exec_func
-from biagent.utils.logger import biagent_logger as logger
+from biagent.utils.llm_helpers import get_chat_model
 from biagent.utils.output_parser import parse_python_markdown
 
 
@@ -33,15 +32,11 @@ class GeoCountMatrixReader(BaseTool):
 
     def __init__(
         self,
-        llm: dict | BaseChatModel | None,
+        llm: str | dict | BaseChatModel,
         cfg: dict | None = {},
     ):
         super().__init__(cfg)
-        if isinstance(llm, dict):
-            self.llm_config = llm
-            self.llm = get_chat_model(**self.llm_config)
-        else:
-            self.llm = llm
+        self.llm = get_chat_model(llm)
 
     def _construct_context(self, file_content: dict) -> str:
         final_str = "### SUPP FILES\n"
@@ -52,11 +47,11 @@ class GeoCountMatrixReader(BaseTool):
 
     def process_gsm(self, gsm_id: str) -> AnnData:
         # step 1: determine whether using supp files or process fastq files
-        file_content = geo_helper.get_supp_data(gsm_id)
+        file_content = geo_helpers.get_supp_data(gsm_id)
         if len(file_content["files"]) == 0:
             raise ValueError("No supplementary file found")
         # step 2: Anndata reading
-        file_type = geo_helper.check_file_type(file_content)
+        file_type = geo_helpers.check_file_type(file_content)
 
         if file_type == FileType.UNKNOWN:
             raise ValueError("Unknown file type")
@@ -65,7 +60,6 @@ class GeoCountMatrixReader(BaseTool):
         template = self.prompt_templates[file_type]
         prompt = template.render(files=context, folder_path=file_content["dir"])
 
-        logger.info(f"Input tokens: {count_tokens(prompt)}")
         reply = self.llm.chat(prompt)
         if "Error" in reply:
             raise ValueError(f"Error reading count matrix: {reply}")

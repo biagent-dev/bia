@@ -2,81 +2,10 @@ import argparse
 import json
 
 import pandas as pd
-import tqdm
-from GEOparse.GEOTypes import GSE, GSM
-from joblib import Memory, Parallel, delayed
 
-from biagent.tools import GeoCountMatrixReader, GeoMetadataExtraction
-from biagent.utils import geo_helper
-from biagent.utils.logger import biagent_logger as logger
-
-
-def _metadata_task(
-    gsm_id: str = None,
-    model: str = "qwen1.5-72b-chat",
-    gsm: GSM = None,
-    gse: GSE = None,
-    tool: GeoMetadataExtraction = None,
-) -> dict:
-    assert gsm_id is not None or gsm is not None
-    if gsm is None:
-        gsm, gse = geo_helper.get_geo(gsm_id, return_gse=True)
-
-    if tool is None:
-        llm_config = {
-            "model": model,
-            "model_server": "dashscope",
-        }
-        tool = GeoMetadataExtraction(llm=llm_config)
-    extracted_metadata = tool.parse_gsm(gsm, gse)
-    return extracted_metadata
-
-
-def _metadata_task_soft_file_list(
-    soft_file_list: str,
-    max_gsms_per_gse: int,
-    model: str,
-    parallel: int,
-    progress: bool = True,
-    cache_dir: str = None,
-) -> list[dict]:
-    with open(soft_file_list, "r") as f:
-        soft_files = [l.strip() for l in f.readlines()]
-
-    logger.info(f"Reading content from {len(soft_files)} soft files")
-    llm_config = {
-        "model": model,
-        "model_server": "dashscope",
-    }
-    tool = GeoMetadataExtraction(llm=llm_config)
-
-    gsms = [
-        t
-        for tup in Parallel(n_jobs=parallel)(
-            delayed(geo_helper.process_soft_files)(f, max_gsms_per_gse=max_gsms_per_gse)
-            for f in tqdm.tqdm(soft_files, disable=not progress)
-        )
-        for t in tup
-    ]
-    if cache_dir is not None:
-        logger.info(f"Caching GSM and GSE objects to {cache_dir}")
-        _metadata_task_cached = Memory(location=cache_dir, verbose=0).cache(
-            _metadata_task, ignore=["tool"]
-        )
-    else:
-        _metadata_task_cached = _metadata_task
-
-    if parallel == 1:
-        extracted_metadatas = [
-            _metadata_task_cached(gsm=gsm, gse=gse, model=model, tool=tool)
-            for gsm, gse in tqdm.tqdm(gsms, disable=not progress)
-        ]
-    else:
-        extracted_metadatas = Parallel(n_jobs=parallel, backend="threading")(
-            delayed(_metadata_task_cached)(gsm=gsm, gse=gse, model=model, tool=tool)
-            for gsm, gse in tqdm.tqdm(gsms, disable=not progress)
-        )
-    return extracted_metadatas
+from biagent.tools import GeoCountMatrixReader, PipelineExtractor
+from biagent.utils import geo_helpers
+from biagent.utils.metadata_helpers import metadata_task, metadata_task_soft_file_list
 
 
 def cli():
@@ -147,14 +76,30 @@ def cli():
 
     geo_search_subparser.add_argument("query", type=str, help="The query string")
 
+    pipeline_extractor_subparser = subparsers.add_parser(
+        "pipeline_extractor", help="Extract the pipeline from a given paper"
+    )
+    pipeline_extractor_subparser.add_argument(
+        "--parsed_paper",
+        type=str,
+        help="path to the paper in `md` format",
+        required=True,
+    )
+    pipeline_extractor_subparser.add_argument(
+        "--output",
+        type=str,
+        help="path to the output pipeline file, html or json",
+        required=True,
+    )
+
     args = parser.parse_args()
 
     if args.subparser_name == "metadata":
         if args.gsm_id:
-            metadatas = [_metadata_task(args.gsm_id, args.model)]
+            metadatas = [metadata_task(args.gsm_id, args.model)]
         elif args.soft_file_list:
             assert args.output is not None, "Please provide output file path"
-            metadatas = _metadata_task_soft_file_list(
+            metadatas = metadata_task_soft_file_list(
                 args.soft_file_list,
                 args.max_gsms_per_gse,
                 args.model,
@@ -169,13 +114,15 @@ def cli():
         else:
             print(metadatas)
     elif args.subparser_name == "geo_search":
-        results = geo_helper.search_geo_records(args.query)
+        results = geo_helpers.search_geo_records(args.query)
         print(json.dumps(results, indent=2))
     elif args.subparser_name == "count_matrix":
-        count_matrix_reader = GeoCountMatrixReader(
-            llm={"model": args.model, "model_server": "dashscope"}
-        )
+        count_matrix_reader = GeoCountMatrixReader(llm=args.model)
         adata = count_matrix_reader.process_gsm(args.gsm_id)
         adata.write_h5ad(args.output)
+    elif args.subparser_name == "pipeline_extractor":
+        pipeline_extractor = PipelineExtractor(llm=args.model)
+
+        pipeline_extractor.extract_pipeline(args.parsed_paper, args.output)
     else:
         raise NotImplementedError
