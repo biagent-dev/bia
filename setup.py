@@ -43,7 +43,7 @@ if __name__ == "__main__":
         author="biagent Contributors",
         packages=find_packages(),
         include_package_data=True,
-        python_requires=">=3.9",
+        python_requires=">=3.10",
         license="MIT",
         install_requires=parse_requirements("requirements.txt"),
         zip_safe=False,
